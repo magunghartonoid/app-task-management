@@ -72,7 +72,7 @@
                     type: 'GET'
                 },
                 columns: [
-                    { data: 'no', name: 'no', orderable: false, searchable: false },
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'username', name: 'username' },
                     { data: 'email', name: 'email' },

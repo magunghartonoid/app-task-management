@@ -7,7 +7,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
@@ -21,59 +21,21 @@ class UserController extends Controller
 
     /**
      * Endpoint server-side untuk DataTables (dipanggil via AJAX).
+     * Menggunakan package Yajra\DataTables — search, sort, dan pagination
+     * sudah ditangani otomatis oleh package ini.
      * GET /users/data
      */
     public function data(Request $request)
     {
-        $query = User::query()->select(['id', 'name', 'username', 'email', 'created_at']);
+        $query = User::query()->select(['id', 'name', 'username', 'email']);
 
-        // Pencarian global dari DataTables
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        $totalRecords = User::count();
-        $filteredRecords = $query->count();
-
-        // Ordering
-        $columns = ['id', 'name', 'username', 'email', 'created_at'];
-        if ($request->filled('order.0.column')) {
-            $orderColIndex = (int) $request->input('order.0.column');
-            $orderDir = $request->input('order.0.dir', 'asc');
-            if (isset($columns[$orderColIndex])) {
-                $query->orderBy($columns[$orderColIndex], $orderDir);
-            }
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination DataTables
-        $start = (int) $request->input('start', 0);
-        $length = (int) $request->input('length', 10);
-        $users = $query->skip($start)->take($length)->get();
-
-        $data = $users->map(function ($user, $index) use ($start) {
-            return [
-                'DT_RowId' => 'row_' . $user->id,
-                'no'       => $start + $index + 1,
-                'id'       => $user->id,
-                'name'     => e($user->name),
-                'username' => e($user->username),
-                'email'    => e($user->email),
-                'aksi'     => view('users.partials.aksi', compact('user'))->render(),
-            ];
-        });
-
-        return response()->json([
-            'draw'            => (int) $request->input('draw', 1),
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $data,
-        ]);
+        return DataTables::of($query)
+            ->addIndexColumn() // otomatis nambah kolom "DT_RowIndex" (nomor urut, ngikutin halaman)
+            ->addColumn('aksi', function ($user) {
+                return view('users.partials.aksi', compact('user'))->render();
+            })
+            ->rawColumns(['aksi']) // supaya HTML tombol aksi tidak di-escape
+            ->make(true);
     }
 
     /**
