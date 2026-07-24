@@ -77,7 +77,16 @@ class UserController extends Controller
     }
 
     /**
-     * Simpan user baru. POST /users (AJAX)
+     * Tampilkan halaman form tambah user (halaman terpisah, bukan modal).
+     * GET /users/create
+     */
+    public function create()
+    {
+        return view('users.create');
+    }
+
+    /**
+     * Simpan user baru. POST /users (dipanggil via AJAX dari halaman users/create)
      */
     public function store(StoreUserRequest $request)
     {
@@ -98,18 +107,16 @@ class UserController extends Controller
     }
 
     /**
-     * Ambil detail satu user untuk mengisi form edit. GET /users/{user}/edit (AJAX)
+     * Tampilkan halaman form edit user (halaman terpisah, bukan modal).
+     * GET /users/{user}/edit
      */
     public function edit(User $user)
     {
-        return response()->json([
-            'success' => true,
-            'data'    => $user->only(['id', 'name', 'username', 'email']),
-        ]);
+        return view('users.edit', compact('user'));
     }
 
     /**
-     * Update user. PUT /users/{user} (AJAX)
+     * Update user. PUT /users/{user} (dipanggil via AJAX dari halaman users/edit)
      */
     public function update(UpdateUserRequest $request, User $user)
     {

@@ -1,10 +1,9 @@
 <div class="text-nowrap">
-    <button type="button"
-        class="btn btn-warning btn-sm btn-edit-user"
-        data-id="{{ $user->id }}"
+    <a href="{{ route('users.edit', $user->id) }}"
+        class="btn btn-warning btn-sm"
         title="Edit">
         <i class="fas fa-pen"></i>
-    </button>
+    </a>
     <button type="button"
         class="btn btn-danger btn-sm btn-delete-user"
         data-id="{{ $user->id }}"

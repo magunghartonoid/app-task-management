@@ -21,9 +21,9 @@ Route::middleware('auth')->group(function () {
     // agar tidak bentrok dengan route users/{user})
     Route::get('/users/data', [UserController::class, 'data'])->name('users.data');
 
-    // CRUD User
+    // CRUD User (halaman terpisah untuk create & edit)
     Route::resource('users', UserController::class)
-        ->except(['create', 'show']);
+        ->except(['show']);
 });
 
 require __DIR__.'/auth.php';
