@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -27,14 +29,18 @@ class UserController extends Controller
      */
     public function data(Request $request)
     {
-        $query = User::query()->select(['id', 'name', 'username', 'email']);
+        $query = User::query()->select(['id', 'name', 'username', 'email', 'photo']);
 
         return DataTables::of($query)
-            ->addIndexColumn() // otomatis nambah kolom "DT_RowIndex" (nomor urut, ngikutin halaman)
+            ->addIndexColumn()
+            ->addColumn('photo', function ($user) {
+                return '<img src="' . $user->photo_url . '" alt="' . e($user->name) . '" '
+                    . 'class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">';
+            })
             ->addColumn('aksi', function ($user) {
                 return view('users.partials.aksi', compact('user'))->render();
             })
-            ->rawColumns(['aksi']) // supaya HTML tombol aksi tidak di-escape
+            ->rawColumns(['photo', 'aksi'])
             ->make(true);
     }
 
@@ -60,6 +66,12 @@ class UserController extends Controller
             'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Kalau ada file foto yang diupload, simpan ke storage/app/public/photos
+        if ($request->hasFile('photo')) {
+            $user->photo = $this->storePhoto($request->file('photo'));
+            $user->save();
+        }
 
         return response()->json([
             'success' => true,
@@ -93,6 +105,14 @@ class UserController extends Controller
             $user->password = Hash::make($validated['password']);
         }
 
+        // Kalau user upload foto baru, hapus foto lama (kalau ada) lalu simpan yang baru
+        if ($request->hasFile('photo')) {
+            if ($user->photo) {
+                Storage::disk('public')->delete('photos/' . $user->photo);
+            }
+            $user->photo = $this->storePhoto($request->file('photo'));
+        }
+
         $user->save();
 
         return response()->json([
@@ -115,11 +135,28 @@ class UserController extends Controller
             ], 422);
         }
 
+        // Hapus file foto profil (kalau ada) supaya tidak jadi file sampah
+        if ($user->photo) {
+            Storage::disk('public')->delete('photos/' . $user->photo);
+        }
+
         $user->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'User berhasil dihapus.',
         ]);
+    }
+
+    /**
+     * Helper: simpan file foto upload ke storage/app/public/photos
+     * dan kembalikan nama filenya saja (yang disimpan di kolom `photo`).
+     */
+    private function storePhoto($file): string
+    {
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('photos', $filename, 'public');
+
+        return $filename;
     }
 }

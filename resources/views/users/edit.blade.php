@@ -21,9 +21,20 @@
         </div>
         <div class="card-body">
 
-            <form id="formUser">
+            <form id="formUser" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" id="user_id" value="{{ $user->id }}">
+
+                <div class="mb-3 text-center">
+                    <img id="photoPreview" src="{{ $user->photo_url }}"
+                        alt="Preview foto" class="rounded-circle mb-2" style="width:100px;height:100px;object-fit:cover;">
+                    <div>
+                        <label for="photo" class="form-label">Foto Profil</label>
+                        <input type="file" class="form-control" id="photo" name="photo" accept="image/png, image/jpeg, image/webp">
+                        <small class="text-muted">Kosongkan jika tidak ingin mengganti foto. Maks 2MB.</small>
+                        <div class="invalid-feedback" data-error="photo"></div>
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
@@ -93,6 +104,14 @@
                 });
             }
 
+            // Preview foto sebelum diupload
+            $('#photo').on('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    $('#photoPreview').attr('src', URL.createObjectURL(file));
+                }
+            });
+
             $('#formUser').on('submit', function (e) {
                 e.preventDefault();
                 clearFormErrors();
@@ -103,12 +122,17 @@
                 $submitBtn.find('.spinner-border').removeClass('d-none');
                 $('#btnSubmitUserText').text('Menyimpan...');
 
-                const payload = $(this).serialize() + '&_method=PUT';
+                // Pakai FormData (bukan .serialize()) karena ada file yang diupload.
+                // _method=PUT ditambahkan manual supaya Laravel tetap menganggapnya PUT (method spoofing).
+                const formData = new FormData(this);
+                formData.append('_method', 'PUT');
 
                 $.ajax({
                     url: "{{ url('users') }}/" + id,
                     type: 'POST', // method spoofing utk PUT
-                    data: payload,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                 }).done(function (res) {
                     if (res.success) {
                         Swal.fire({

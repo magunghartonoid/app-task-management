@@ -25,6 +25,7 @@ class StoreUserRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,username'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'photo'    => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ];
     }
 
@@ -43,6 +44,9 @@ class StoreUserRequest extends FormRequest
             'email.unique'      => 'Email sudah terdaftar.',
             'password.required' => 'Password wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'photo.image'       => 'File foto harus berupa gambar.',
+            'photo.mimes'       => 'Format foto harus jpeg, jpg, png, atau webp.',
+            'photo.max'         => 'Ukuran foto maksimal 2MB.',
         ];
     }
 

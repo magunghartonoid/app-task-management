@@ -29,6 +29,7 @@
                     <thead>
                         <tr>
                             <th style="width:60px;">No</th>
+                            <th style="width:70px;">Foto</th>
                             <th>Name</th>
                             <th>Username</th>
                             <th>Email</th>
@@ -73,6 +74,7 @@
                 },
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'photo', name: 'photo', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'username', name: 'username' },
                     { data: 'email', name: 'email' },

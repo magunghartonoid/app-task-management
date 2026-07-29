@@ -17,7 +17,12 @@
                 <span class="me-2 d-none d-lg-inline small">
                     {{ Auth::check() ? Auth::user()->name : 'Guest' }}
                 </span>
-                <i class="fas fa-user-circle fa-fw"></i>
+                @if(Auth::check())
+                    <img src="{{ Auth::user()->photo_url }}" alt="{{ Auth::user()->name }}"
+                        class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">
+                @else
+                    <i class="fas fa-user-circle fa-fw"></i>
+                @endif
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>

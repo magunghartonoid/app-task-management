@@ -21,8 +21,19 @@
         </div>
         <div class="card-body">
 
-            <form id="formUser">
+            <form id="formUser" enctype="multipart/form-data">
                 @csrf
+
+                <div class="mb-3 text-center">
+                    <img id="photoPreview" src="https://ui-avatars.com/api/?name=User&background=e9ecef&color=6c757d"
+                        alt="Preview foto" class="rounded-circle mb-2" style="width:100px;height:100px;object-fit:cover;">
+                    <div>
+                        <label for="photo" class="form-label">Foto Profil</label>
+                        <input type="file" class="form-control" id="photo" name="photo" accept="image/png, image/jpeg, image/webp">
+                        <small class="text-muted">Opsional. Format JPG/PNG/WEBP, maks 2MB.</small>
+                        <div class="invalid-feedback" data-error="photo"></div>
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
@@ -89,6 +100,14 @@
                 });
             }
 
+            // Preview foto sebelum diupload
+            $('#photo').on('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    $('#photoPreview').attr('src', URL.createObjectURL(file));
+                }
+            });
+
             $('#formUser').on('submit', function (e) {
                 e.preventDefault();
                 clearFormErrors();
@@ -98,10 +117,15 @@
                 $submitBtn.find('.spinner-border').removeClass('d-none');
                 $('#btnSubmitUserText').text('Menyimpan...');
 
+                // Pakai FormData (bukan .serialize()) karena ada file yang diupload
+                const formData = new FormData(this);
+
                 $.ajax({
                     url: "{{ route('users.store') }}",
                     type: 'POST',
-                    data: $(this).serialize(),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                 }).done(function (res) {
                     if (res.success) {
                         Swal.fire({

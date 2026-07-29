@@ -36,6 +36,7 @@ class UpdateUserRequest extends FormRequest
             ],
             // nullable: hanya divalidasi kalau diisi
             'password' => ['nullable', 'confirmed', Password::defaults()],
+            'photo'    => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ];
     }
 
@@ -53,6 +54,9 @@ class UpdateUserRequest extends FormRequest
             'email.email'       => 'Format email tidak valid.',
             'email.unique'      => 'Email sudah terdaftar.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'photo.image'       => 'File foto harus berupa gambar.',
+            'photo.mimes'       => 'Format foto harus jpeg, jpg, png, atau webp.',
+            'photo.max'         => 'Ukuran foto maksimal 2MB.',
         ];
     }
 
