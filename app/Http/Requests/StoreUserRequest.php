@@ -2,13 +2,15 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
     /**
-     * Tentukan apakah user berhak melakukan request ini.
+     * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -16,22 +18,21 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
-     * Aturan validasi untuk membuat user baru.
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,username'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'photo'    => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'name'      => ['required', 'string', 'max:255'],
+            'username'  => ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,username'],
+            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'  => ['required', 'confirmed', Password::defaults()],
+            'photo'     => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ];
     }
 
-    /**
-     * Pesan error custom (Bahasa Indonesia).
-     */
     public function messages(): array
     {
         return [
@@ -44,16 +45,9 @@ class StoreUserRequest extends FormRequest
             'email.unique'      => 'Email sudah terdaftar.',
             'password.required' => 'Password wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'photo.image'       => 'File foto harus berupa gambar.',
-            'photo.mimes'       => 'Format foto harus jpeg, jpg, png, atau webp.',
-            'photo.max'         => 'Ukuran foto maksimal 2MB.',
         ];
     }
 
-    /**
-     * Response custom saat validasi gagal (khusus request AJAX/JSON)
-     * supaya bisa ditangkap SweetAlert di frontend.
-     */
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         if ($this->expectsJson() || $this->ajax()) {
@@ -65,7 +59,7 @@ class StoreUserRequest extends FormRequest
                 ], 422)
             );
         }
-
-        parent::failedValidation($validator);
     }
+
+
 }

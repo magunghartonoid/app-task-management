@@ -10,14 +10,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Request;
 
-#[Fillable(['name', 'email', 'password', 'username', 'photo'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable (['name', 'username', 'email', 'password', 'photo'])]
+#[Hidden (['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
+    protected $table = 'users';
     /**
      * Get the attributes that should be cast.
      *
@@ -31,13 +32,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Accessor: URL foto profil user.
-     * Kalau user belum punya foto, kembalikan avatar default (UI Avatars,
-     * dibuat otomatis dari inisial nama, tidak perlu file apa pun).
-     *
-     * Dipakai di Blade dengan: $user->photo_url
-     */
     public function getPhotoUrlAttribute(): string
     {
         if ($this->photo && Storage::disk('public')->exists('photos/' . $this->photo)) {
@@ -45,5 +39,15 @@ class User extends Authenticatable
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=4e73df&color=fff';
+    }
+
+    public function createdRequest()
+    {
+        return $this->hasMany(Request::class, 'created_by');
+    }
+
+    public function assignedRequests()
+    {
+        return $this->hasMany(Request::class, 'assigned_to');
     }
 }

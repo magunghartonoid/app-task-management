@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -9,7 +10,7 @@ use Illuminate\Validation\Rules\Password;
 class UpdateUserRequest extends FormRequest
 {
     /**
-     * Tentukan apakah user berhak melakukan request ini.
+     * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -17,32 +18,24 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * Aturan validasi untuk update user.
-     * Password bersifat opsional: kosongkan = tidak diubah.
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $userId = $this->route('user');
 
         return [
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => [
-                'required', 'string', 'max:255', 'alpha_dash',
-                Rule::unique('users', 'username')->ignore($userId),
-            ],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->ignore($userId),
-            ],
+            'name'      => ['required', 'string', 'max:255'],
+            'username'  => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('users', 'username')->ignore($userId),],
+            'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId),],
             // nullable: hanya divalidasi kalau diisi
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'photo'    => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'photo'     => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ];
     }
 
-    /**
-     * Pesan error custom (Bahasa Indonesia).
-     */
     public function messages(): array
     {
         return [
@@ -53,16 +46,11 @@ class UpdateUserRequest extends FormRequest
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
             'email.unique'      => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'photo.image'       => 'File foto harus berupa gambar.',
-            'photo.mimes'       => 'Format foto harus jpeg, jpg, png, atau webp.',
-            'photo.max'         => 'Ukuran foto maksimal 2MB.',
         ];
     }
 
-    /**
-     * Response custom saat validasi gagal (khusus request AJAX/JSON).
-     */
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         if ($this->expectsJson() || $this->ajax()) {
@@ -76,5 +64,6 @@ class UpdateUserRequest extends FormRequest
         }
 
         parent::failedValidation($validator);
+
     }
 }

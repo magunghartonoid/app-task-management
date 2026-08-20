@@ -43,6 +43,8 @@
     {{-- Scripts --}}
     @include('sb2admin.partials.scripts')
 
+    @stack('scripts')
+
 </body>
 
 </html>
