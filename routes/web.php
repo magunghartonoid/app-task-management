@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\UserController;
@@ -11,9 +12,8 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])->name('dashboard');
 
 
 Route::middleware('auth')->group(function () {
@@ -30,11 +30,16 @@ Route::middleware('auth')->group(function () {
 
     // request
     Route::get('/requests/data', [RequestController::class, 'data'])->name('requests.data');
+    Route::patch('/requests/{request}/complete', [RequestController::class, 'complete'])->name('requests.complete');
     Route::resource('requests', RequestController::class)->except(['show']);
 
     // report
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
+
+    // dashboard - ajax
+    Route::get('/dashboard/clients/{client}/incomplete-requests', [DashboardController::class, 'clientIncompleteRequests'])
+        ->name('dashboard.client-incomplete-requests');
 });
 
 require __DIR__.'/auth.php';

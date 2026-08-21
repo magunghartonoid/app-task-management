@@ -6,6 +6,3 @@
 
 {{-- Chart.js - AKTIFKAN hanya kalau ada halaman yang pakai chart --}}
 {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script> --}}
-
-{{-- Slot tambahan untuk script khusus per halaman --}}
-@stack('scripts')

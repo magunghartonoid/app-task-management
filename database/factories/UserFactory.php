@@ -22,10 +22,21 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    private static ?\Faker\Generator $idFaker = null;
+
+    protected function idFaker(): \Faker\Generator
+    {
+        return static::$idFaker ??= \Faker\Factory::create('id_ID');
+    }
+
     public function definition(): array
     {
+        $name = $this->idFaker()->name();
+        $username = Str::slug($name, '') . fake()->unique()->numberBetween(1, 9999);
+
         return [
-            'name' => fake()->name(),
+            'name' => $name,
+            'username' => $username,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

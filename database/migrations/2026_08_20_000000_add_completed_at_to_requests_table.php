@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('photo')->nullable()->after('username');
+        Schema::table('requests', function (Blueprint $table) {
+            $table->timestamp('completed_at')->nullable()->after('status');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('photo');
+        Schema::table('requests', function (Blueprint $table) {
+            $table->dropColumn('completed_at');
         });
     }
 };

@@ -162,6 +162,29 @@ class RequestController extends Controller
     }
 
     /**
+     * Tandai request sebagai completed (dipanggil dari tombol Complete via AJAX).
+     */
+    public function complete(Request $request)
+    {
+        if ($request->status === 'completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permintaan ini sudah selesai sebelumnya.',
+            ], 422);
+        }
+
+        $request->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan berhasil ditandai selesai.',
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request)
